@@ -25,12 +25,18 @@ class RandomFragment : Fragment() {
     /**
      * The number we'll be communicating back
      */
-    private var _myRandomNumber : Int = 0
+    private var _myRandomNumber = -1
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        // Try to fetch our random number from the saved instance state
+        _myRandomNumber = savedInstanceState?.getInt(NUMBER_KEY, -1) ?: -1;
+        if (_myRandomNumber < 0) {
+            generateNumber()
+        }
+
         _binding = RandomFragmentBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -38,8 +44,13 @@ class RandomFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        generateNumber()
-        binding.buttonRegenerate.setOnClickListener { generateNumber() }
+        // Set the number restored / generated in OnCreateView
+        updateNumberText()
+
+        binding.buttonRegenerate.setOnClickListener {
+            generateNumber()
+            updateNumberText()
+        }
         binding.buttonSend.setOnClickListener {
             // Create a result, set it, and pop the backstack to return home
             val fm = requireActivity().supportFragmentManager
@@ -54,7 +65,17 @@ class RandomFragment : Fragment() {
      */
     fun generateNumber() {
         _myRandomNumber = Random.nextInt(0, 1000)
-        binding.randomNumber.text = resources.getString(R.string.your_number, _myRandomNumber);
+    }
+
+    fun updateNumberText() {
+        binding.randomNumber.text = resources.getString(R.string.your_number, _myRandomNumber)
+    }
+
+    // Called when the fragment is about to be destroyed but it wasn't left explicitly,
+    // this is the place where you can store state to be restored later.
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putInt(NUMBER_KEY, _myRandomNumber)
     }
 
     override fun onDestroyView() {

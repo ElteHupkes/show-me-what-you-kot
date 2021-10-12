@@ -22,8 +22,10 @@ class MainActivity : AppCompatActivity() {
 
         setSupportActionBar(binding.toolbar)
 
-        supportFragmentManager.beginTransaction()
-            .add(R.id.fragment_container, HomeFragment())
-            .commit()
+        if (savedInstanceState == null) {
+            supportFragmentManager.beginTransaction()
+                .add(R.id.fragment_container, HomeFragment())
+                .commit()
+        }
     }
 }

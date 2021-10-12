@@ -24,13 +24,17 @@ class HomeFragment : Fragment() {
     // onDestroyView.
     private val binding get() = _binding!!
 
+    // The number returned from our fragment
+    private var _selectedNumber = -1
+
     override fun onCreateView(
             inflater: LayoutInflater, container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View {
+        // Try to restore the saved number
+        _selectedNumber = savedInstanceState?.getInt(NUMBER_KEY, -1) ?: -1;
         _binding = HomeFragmentBinding.inflate(inflater, container, false)
         return binding.root
-
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -38,6 +42,7 @@ class HomeFragment : Fragment() {
 
         // Show the dialog when we click the get number button
         binding.buttonGetNumber.setOnClickListener { showGetNumberDialog() }
+        updateNumberText()
 
         // Set a listener using the Fragment Result API:
         // https://developer.android.com/guide/fragments/communicate#kotlin
@@ -45,9 +50,15 @@ class HomeFragment : Fragment() {
         // I wasn't using view models / data binding for this sample, so I won't.
         requireActivity().supportFragmentManager
             .setFragmentResultListener(RANDOM_FRAG_REQUEST_KEY, this) { _, bundle ->
-                val num = bundle.getInt(NUMBER_KEY, -1)
-                binding.returnedNumber.text = resources.getString(R.string.selected_number, num)
+                _selectedNumber = bundle.getInt(NUMBER_KEY, -1)
+                updateNumberText()
             }
+    }
+
+    fun updateNumberText() {
+        binding.returnedNumber.text = if (_selectedNumber >= 0)
+            resources.getString(R.string.selected_number, _selectedNumber)
+        else resources.getString(R.string.no_number_yet)
     }
 
     /**
@@ -79,6 +90,13 @@ class HomeFragment : Fragment() {
             .replace(R.id.fragment_container, RandomFragment())
             .addToBackStack("random")
             .commit()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        if (_selectedNumber >= 0) {
+            outState.putInt(NUMBER_KEY, _selectedNumber)
+        }
     }
 
     override fun onDestroyView() {
