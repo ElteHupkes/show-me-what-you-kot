@@ -1,24 +1,44 @@
 package me.elte.kotit.eps1
 
+import android.app.Activity
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContract
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
-import me.elte.kotit.eps1.databinding.HomeFragmentBinding
+import me.elte.kotit.eps1.databinding.FragmentHomeBinding
 
 // Request keys for activity / fragment random number fetching
-const val RANDOM_REQUEST_KEY = 994
 const val RANDOM_FRAG_REQUEST_KEY = "random_request"
 const val NUMBER_KEY = "random_number"
 
 /**
- * A simple [Fragment] subclass as the second destination in the navigation.
+ * Activity result passing contract for the Activity Result API
+ */
+class IntegerResultContract : ActivityResultContract<Unit, Int>() {
+    override fun parseResult(resultCode: Int, intent: Intent?): Int = when(resultCode) {
+        Activity.RESULT_OK -> intent?.getIntExtra(NUMBER_KEY, -1) ?: -1
+        else -> -1
+    }
+
+    override fun createIntent(context: Context, input: Unit): Intent {
+        return Intent(context, RandomActivity::class.java)
+    }
+
+}
+
+/**
+ * The home fragment for our app, displays a generated number received from either
+ * the other activity, or the RandomFragment
  */
 class HomeFragment : Fragment() {
 
-    private var _binding: HomeFragmentBinding? = null
+    private var _binding: FragmentHomeBinding? = null
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -27,13 +47,21 @@ class HomeFragment : Fragment() {
     // The number returned from our fragment
     private var _selectedNumber = -1
 
+    private lateinit var _activityLauncher : ActivityResultLauncher<Unit>
+
     override fun onCreateView(
             inflater: LayoutInflater, container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View {
         // Try to restore the saved number
         _selectedNumber = savedInstanceState?.getInt(NUMBER_KEY, -1) ?: -1;
-        _binding = HomeFragmentBinding.inflate(inflater, container, false)
+        _binding = FragmentHomeBinding.inflate(inflater, container, false)
+
+        _activityLauncher = registerForActivityResult(IntegerResultContract()) {
+            _selectedNumber = it;
+            updateNumberText()
+        }
+
         return binding.root
     }
 
@@ -55,6 +83,7 @@ class HomeFragment : Fragment() {
             }
     }
 
+    // Like I said, view models and bindings are saved for next time..
     fun updateNumberText() {
         binding.returnedNumber.text = if (_selectedNumber >= 0)
             resources.getString(R.string.selected_number, _selectedNumber)
@@ -72,7 +101,7 @@ class HomeFragment : Fragment() {
                     resources.getString(R.string.pick_activity),
                     resources.getString(R.string.pick_fragment)
                 )
-            ) { dialog, choice ->
+            ) { _, choice ->
                 when (choice) {
                     0 -> launchActivity()
                     else -> launchFragment()
@@ -82,7 +111,7 @@ class HomeFragment : Fragment() {
     }
 
     fun launchActivity() {
-        TODO("Not implemented yet")
+        _activityLauncher.launch(Unit)
     }
 
     fun launchFragment() {

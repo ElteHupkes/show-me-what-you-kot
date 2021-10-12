@@ -5,10 +5,8 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.core.os.bundleOf
-import me.elte.kotit.eps1.databinding.HomeFragmentBinding
-import me.elte.kotit.eps1.databinding.RandomFragmentBinding
+import me.elte.kotit.eps1.databinding.FragmentRandomBinding
 import kotlin.random.Random
 
 /**
@@ -16,7 +14,7 @@ import kotlin.random.Random
  */
 class RandomFragment : Fragment() {
 
-    private var _binding: RandomFragmentBinding? = null
+    private var _binding: FragmentRandomBinding? = null
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -37,7 +35,7 @@ class RandomFragment : Fragment() {
             generateNumber()
         }
 
-        _binding = RandomFragmentBinding.inflate(inflater, container, false)
+        _binding = FragmentRandomBinding.inflate(inflater, container, false)
         return binding.root
     }
 

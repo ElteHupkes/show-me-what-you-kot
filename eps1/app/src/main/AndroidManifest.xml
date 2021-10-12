@@ -10,6 +10,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.KotIt">
         <activity
+            android:name=".RandomActivity"
+            android:exported="false"
+            android:label="@string/title_activity_test"
+            android:theme="@style/Theme.KotIt.NoActionBar" />
+        <activity
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"
