@@ -47,7 +47,10 @@ class HomeFragment : Fragment() {
     // The number returned from our fragment
     private var _selectedNumber = -1
 
-    private lateinit var _activityLauncher : ActivityResultLauncher<Unit>
+    private val _activityLauncher : ActivityResultLauncher<Unit> = registerForActivityResult(IntegerResultContract()) {
+        _selectedNumber = it;
+        updateNumberText()
+    }
 
     override fun onCreateView(
             inflater: LayoutInflater, container: ViewGroup?,
@@ -56,11 +59,6 @@ class HomeFragment : Fragment() {
         // Try to restore the saved number
         _selectedNumber = savedInstanceState?.getInt(NUMBER_KEY, -1) ?: -1;
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
-
-        _activityLauncher = registerForActivityResult(IntegerResultContract()) {
-            _selectedNumber = it;
-            updateNumberText()
-        }
 
         return binding.root
     }
